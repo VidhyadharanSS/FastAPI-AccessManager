@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuickML Task manager : Admin</title>
+</head>
+<body>
+    <h1>Employees</h1>
+    <ul id="employee-list"></ul>
+
+    <h2>Add New Employee</h2>
+    <form id="add-employee-form">
+        <label for="employee-name">Name:</label><br>
+        <input type="text" id="employee-name" name="employee-name"><br>
+        <label for="employee-email">Email:</label><br>
+        <input type="email" id="employee-email" name="employee-email"><br>
+        <label for="user-username">Username:</label><br>
+        <input type="text" id="user-username" name="user-username"><br>
+        <label for="user-password">Password:</label><br>
+        <input type="password" id="user-password" name="user-password"><br><br>
+        <button type="submit">Add Employee</button>
+    </form>
+
+    <script>
+        const employeeList = document.getElementById('employee-list');
+        const addEmployeeForm = document.getElementById('add-employee-form');
+
+        async function fetchEmployees() {
+            const response = await fetch('/employees/'); // Adjust if your Heroku app has a different root path
+            const employees = await response.json();
+            employeeList.innerHTML = ''; // Clear existing list
+            employees.forEach(employee => {
+                const li = document.createElement('li');
+                li.textContent = `${employee.name} (${employee.email})`;
+                employeeList.appendChild(li);
+            });
+        }
+
+        addEmployeeForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('employee-name').value;
+            const email = document.getElementById('employee-email').value;
+            const username = document.getElementById('user-username').value;
+            const password = document.getElementById('user-password').value;
+
+            const newEmployee = {
+                name: name,
+                email: email,
+                user: {
+                    username: username,
+                    password: password
+                }
+            };
+
+            const response = await fetch('/employees/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newEmployee)
+            });
+
+            if (response.ok) {
+                fetchEmployees(); // Refresh the employee list
+                addEmployeeForm.reset();
+            } else {
+                console.error('Error adding employee:', response.statusText);
+            }
+        });
+
+        // Initial load of employees
+        fetchEmployees();
+    </script>
+</body>
+</html>
+    
