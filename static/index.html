@@ -1,38 +1,299 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QuickML Task manager : Admin</title>
+    <title>QuickML Task Manager : Admin - QuickML Team</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Changed font */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align items to the start to avoid content being vertically centered */
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4; /* Optional background color */
+        }
+
+        .container {
+            width: 80%; /* Adjust as needed */
+            max-width: 960px; /* Maximum width of the content */
+            margin-top: 20px; /* Add some top margin */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center; /* Center the headings */
+            color: #333;
+        }
+
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center; /* Center the messages */
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            display: flex; /* Use flexbox to center modal content */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px; /* Limit modal width */
+            border-radius: 8px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        button.edit-employee {
+            background-color: #ffc107; /* Yellow for edit */
+            color: #333;
+        }
+
+        button.delete-employee {
+            background-color: #dc3545; /* Red for delete */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            width: calc(100% - 12px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            margin-bottom: 10px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Employees</h1>
-    <ul id="employee-list"></ul>
+    <div class="container">
+        <h1>QuickML Employee Workload manager</h1>
+        <ul id="employee-list"></ul>
 
-    <h2>Add New Employee</h2>
-    <form id="add-employee-form">
-        <label for="employee-name">Name:</label><br>
-        <input type="text" id="employee-name" name="employee-name"><br>
-        <label for="employee-email">Email:</label><br>
-        <input type="email" id="employee-email" name="employee-email"><br>
-        <label for="user-username">Username:</label><br>
-        <input type="text" id="user-username" name="user-username"><br>
-        <label for="user-password">Password:</label><br>
-        <input type="password" id="user-password" name="user-password"><br><br>
-        <button type="submit">Add Employee</button>
-    </form>
+        <h2>Add New Employee</h2>
+        <form id="add-employee-form">
+            <label for="employee-name">Name:</label><br>
+            <input type="text" id="employee-name" name="employee-name"><br>
+            <label for="employee-email">Email:</label><br>
+            <input type="email" id="employee-email" name="employee-email"><br>
+            <label for="user-username">Username:</label><br>
+            <input type="text" id="user-username" name="user-username"><br>
+            <label for="user-password">Password:</label><br>
+            <input type="password" id="user-password" name="user-password"><br><br>
+            <button type="submit">Add Employee</button>
+        </form>
+
+        <h2>Projects</h2>
+        <ul id="project-list"></ul>
+
+        <h2>Add New Project</h2>
+        <form id="add-project-form">
+            <label for="project-name">Name:</label><br>
+            <input type="text" id="project-name" name="project-name"><br>
+            <label for="project-description">Description:</label><br>
+            <textarea id="project-description" name="project-description"></textarea><br><br>
+            <button type="submit">Add Project</button>
+        </form>
+
+        <div id="response-message" class="message" style="display:none;"></div>
+
+        <!-- Edit Employee Modal -->
+        <div id="editEmployeeModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeEditModal">×</span>
+                <h2>Edit Employee</h2>
+                <form id="edit-employee-form">
+                    <input type="hidden" id="edit-employee-id">
+                    <label for="edit-employee-name">Name:</label><br>
+                    <input type="text" id="edit-employee-name" name="edit-employee-name"><br>
+                    <label for="edit-employee-email">Email:</label><br>
+                    <input type="email" id="edit-employee-email" name="edit-employee-email"><br>
+                    <label for="edit-employee-is-active">Active:</label>
+                    <input type="checkbox" id="edit-employee-is-active" name="edit-employee-is-active"><br><br>
+                    <button type="submit">Update Employee</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Assign to Project Modal -->
+        <div id="assignProjectModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeAssignModal">×</span>
+                <h2>Assign Employee to Project</h2>
+                <p>Assigning employee: <span id="assign-employee-name"></span></p>
+                <input type="hidden" id="assign-employee-id">
+                <form id="assign-project-form">
+                    <label for="assign-project-select">Select Project:</label><br>
+                    <select id="assign-project-select" name="assign-project-select"></select><br><br>
+                    <button type="submit">Assign</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         const employeeList = document.getElementById('employee-list');
         const addEmployeeForm = document.getElementById('add-employee-form');
+        const projectList = document.getElementById('project-list');
+        const addProjectForm = document.getElementById('add-project-form');
+        const responseMessageDiv = document.getElementById('response-message');
+        const editEmployeeModal = document.getElementById('editEmployeeModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const editEmployeeForm = document.getElementById('edit-employee-form');
+        const editEmployeeIdInput = document.getElementById('edit-employee-id');
+        const editEmployeeNameInput = document.getElementById('edit-employee-name');
+        const editEmployeeEmailInput = document.getElementById('edit-employee-email');
+        const editEmployeeIsActiveInput = document.getElementById('edit-employee-is-active');
+        const assignProjectModal = document.getElementById('assignProjectModal');
+        const closeAssignModal = document.getElementById('closeAssignModal');
+        const assignProjectForm = document.getElementById('assign-project-form');
+        const assignProjectSelect = document.getElementById('assign-project-select');
+        const assignEmployeeIdInput = document.getElementById('assign-employee-id');
+        const assignEmployeeNameSpan = document.getElementById('assign-employee-name');
+
+        function showMessage(message, type) {
+            responseMessageDiv.textContent = message;
+            responseMessageDiv.className = `message ${type}`;
+            responseMessageDiv.style.display = 'block';
+            setTimeout(() => {
+                responseMessageDiv.style.display = 'none';
+            }, 3000);
+        }
 
         async function fetchEmployees() {
-            const response = await fetch('/employees/'); // Adjust if your Heroku app has a different root path
-            const employees = await response.json();
-            employeeList.innerHTML = ''; // Clear existing list
-            employees.forEach(employee => {
-                const li = document.createElement('li');
-                li.textContent = `${employee.name} (${employee.email})`;
-                employeeList.appendChild(li);
-            });
+            try {
+                const response = await fetch('/employees/');
+                const employees = await response.json();
+                employeeList.innerHTML = '';
+                employees.forEach(employee => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${employee.name} (${employee.email})
+                                    <div>
+                                        <button data-employee-id="${employee.id}" class="edit-employee">Edit</button>
+                                        <button data-employee-id="${employee.id}" class="delete-employee">Delete</button>
+                                        <button data-employee-id="${employee.id}" data-employee-name="${employee.name}" class="assign-project-btn">Assign to Project</button>
+                                    </div>`;
+                    employeeList.appendChild(li);
+                });
+
+                // Add event listeners for dynamically created buttons
+                addEmployeeButtonEventListeners();
+
+            } catch (error) {
+                console.error('Error fetching employees:', error);
+                showMessage('Error fetching employees', 'error');
+            }
+        }
+
+        async function fetchProjects() {
+            try {
+                const response = await fetch('/projects/');
+                const projects = await response.json();
+                projectList.innerHTML = '';
+                assignProjectSelect.innerHTML = '<option value="">-- Select Project --</option>'; // Reset select options
+                projects.forEach(project => {
+                    const li = document.createElement('li');
+                    li.textContent = `${project.name} - ${project.description || 'No description'}`;
+                    projectList.appendChild(li);
+
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    assignProjectSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                showMessage('Error fetching projects', 'error');
+            }
         }
 
         addEmployeeForm.addEventListener('submit', async (event) => {
@@ -51,25 +312,216 @@
                 }
             };
 
-            const response = await fetch('/employees/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newEmployee)
-            });
+            try {
+                const response = await fetch('/employees/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newEmployee)
+                });
 
-            if (response.ok) {
-                fetchEmployees(); // Refresh the employee list
-                addEmployeeForm.reset();
-            } else {
-                console.error('Error adding employee:', response.statusText);
+                if (response.ok) {
+                    showMessage('Employee added successfully!', 'success');
+                    fetchEmployees();
+                    addEmployeeForm.reset();
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.detail || 'Error adding employee.';
+                    showMessage(errorMessage, 'error');
+                    console.error('Error adding employee:', response.status, errorMessage);
+                }
+            } catch (error) {
+                showMessage('Error adding employee.', 'error');
+                console.error('Error adding employee:', error);
             }
         });
 
-        // Initial load of employees
+        addProjectForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('project-name').value;
+            const description = document.getElementById('project-description').value;
+
+            const newProject = {
+                name: name,
+                description: description
+            };
+
+            try {
+                const response = await fetch('/projects/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newProject)
+                });
+
+                if (response.ok) {
+                    showMessage('Project added successfully!', 'success');
+                    fetchProjects();
+                    addProjectForm.reset();
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.detail || 'Error adding project.';
+                    showMessage(errorMessage, 'error');
+                    console.error('Error adding project:', response.status, errorMessage);
+                }
+            } catch (error) {
+                showMessage('Error adding project.', 'error');
+                console.error('Error adding project:', error);
+            }
+        });
+
+        function addEmployeeButtonEventListeners() {
+            employeeList.querySelectorAll('.delete-employee').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const employeeId = button.dataset.employeeId;
+                    try {
+                        const response = await fetch(`/employees/${employeeId}`, {
+                            method: 'DELETE'
+                        });
+                        if (response.ok) {
+                            showMessage('Employee deleted successfully!', 'success');
+                            fetchEmployees();
+                        } else {
+                            const errorData = await response.json();
+                            const errorMessage = errorData.detail || 'Error deleting employee.';
+                            showMessage(errorMessage, 'error');
+                            console.error('Error deleting employee:', response.status, errorMessage);
+                        }
+                    } catch (error) {
+                        showMessage('Error deleting employee.', 'error');
+                        console.error('Error deleting employee:', error);
+                    }
+                });
+            });
+
+            employeeList.querySelectorAll('.edit-employee').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const employeeId = button.dataset.employeeId;
+                    try {
+                        const response = await fetch(`/employees/${employeeId}`);
+                        if (response.ok) {
+                            const employee = await response.json();
+                            editEmployeeIdInput.value = employee.id;
+                            editEmployeeNameInput.value = employee.name;
+                            editEmployeeEmailInput.value = employee.email;
+                            editEmployeeIsActiveInput.checked = employee.is_active;
+                            editEmployeeModal.style.display = "block";
+                        } else {
+                            const errorData = await response.json();
+                            const errorMessage = errorData.detail || 'Error fetching employee details for editing.';
+                            showMessage(errorMessage, 'error');
+                            console.error('Error fetching employee details:', response.status, errorMessage);
+                        }
+                    } catch (error) {
+                        showMessage('Error fetching employee details.', 'error');
+                        console.error('Error fetching employee details:', error);
+                    }
+                });
+            });
+
+            employeeList.querySelectorAll('.assign-project-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const employeeId = button.dataset.employeeId;
+                    const employeeName = button.dataset.employeeName;
+                    assignEmployeeIdInput.value = employeeId;
+                    assignEmployeeNameSpan.textContent = employeeName;
+                    assignProjectModal.style.display = "block";
+                });
+            });
+        }
+
+        editEmployeeForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const employeeId = editEmployeeIdInput.value;
+            const name = editEmployeeNameInput.value;
+            const email = editEmployeeEmailInput.value;
+            const is_active = editEmployeeIsActiveInput.checked;
+
+            const updatedEmployee = {
+                name: name,
+                email: email,
+                is_active: is_active
+            };
+
+            try {
+                const response = await fetch(`/employees/${employeeId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedEmployee)
+                });
+
+                if (response.ok) {
+                    showMessage('Employee updated successfully!', 'success');
+                    fetchEmployees();
+                    editEmployeeModal.style.display = "none";
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.detail || 'Error updating employee.';
+                    showMessage(errorMessage, 'error');
+                    console.error('Error updating employee:', response.status, errorMessage);
+                }
+            } catch (error) {
+                showMessage('Error updating employee.', 'error');
+                console.error('Error updating employee:', error);
+            }
+        });
+
+        assignProjectForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const employeeId = assignEmployeeIdInput.value;
+            const projectId = assignProjectSelect.value;
+
+            if (!projectId) {
+                showMessage('Please select a project to assign.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/employees/${employeeId}/projects/${projectId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showMessage('Employee assigned to project successfully!', 'success');
+                    assignProjectModal.style.display = "none";
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.detail || 'Error assigning employee to project.';
+                    showMessage(errorMessage, 'error');
+                    console.error('Error assigning employee to project:', response.status, errorMessage);
+                }
+            } catch (error) {
+                showMessage('Error assigning employee to project.', 'error');
+                console.error('Error assigning employee to project:', error);
+            }
+        });
+
+        // Modal close button event listeners
+        closeEditModal.addEventListener('click', () => {
+            editEmployeeModal.style.display = "none";
+        });
+
+        closeAssignModal.addEventListener('click', () => {
+            assignProjectModal.style.display = "none";
+        });
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == editEmployeeModal) {
+                editEmployeeModal.style.display = "none";
+            }
+            if (event.target == assignProjectModal) {
+                assignProjectModal.style.display = "none";
+            }
+        }
+
+        // Initial data loading
         fetchEmployees();
+        fetchProjects();
     </script>
 </body>
 </html>
-    
