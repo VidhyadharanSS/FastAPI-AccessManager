@@ -3,4 +3,3 @@ uvicorn
 SQLAlchemy
 passlib[bcrypt]
 python-dotenv
-gunicorn
